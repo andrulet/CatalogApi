@@ -25,9 +25,10 @@ namespace CatalogApi.Services
 
         private CatalogContext _context;
 
-        public UserService(CatalogContext context)
+        public UserService(CatalogContext context, AppSettings appSettings)
         {
             _context = context;
+            _appSettings = appSettings;
         }
 
         public AuthenticateResponse Authenticate(string email, string password)
