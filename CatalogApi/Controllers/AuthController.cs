@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using CatalogApi.Models;
 using CatalogApi.Services;
+using CatalogApi.Helpers;
+using CatalogApi.Entities;
+using AutoMapper;
+using CatalogApi.Models.Users;
 
 namespace CatalogApi.Controllers
 {
@@ -9,22 +12,42 @@ namespace CatalogApi.Controllers
     public class AuthController : ControllerBase
     {
         private IUserService _userService;
+        private IMapper _mapper;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpPost("login")]
-        [HttpPost("authenticate")]
-        public IActionResult Authenticate(AuthenticateRequest model)
+        public IActionResult Authenticate(AuthenticateModel authenticateModel)
         {
-            var response = _userService.Authenticate(model.Email, model.Password);
+            var response = _userService.Authenticate(authenticateModel.Email, authenticateModel.Password);
 
             if (response == null)
-                return BadRequest(new { message = "Username or password is incorrect" });
+                return BadRequest(new { message = "Email or password is incorrect" });
 
             return Ok(response);
+        }
+
+        [HttpPost("register")]
+        public IActionResult Register(RegisterModel model)
+        {
+            // map model to entity
+            var user = _mapper.Map<User>(model);
+
+            try
+            {
+                // create user
+                _userService.Create(user, model.Password);
+                return Ok(new { message = $"Thank you, {user.FirstName}, for registration!" });
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,14 +22,14 @@ namespace CatalogApi.Services
 
     public class UserService : IUserService
     {
-        private readonly AppSettings _appSettings;
+        private readonly IConfiguration _Configuration;
 
         private CatalogContext _context;
 
-        public UserService(CatalogContext context, AppSettings appSettings)
+        public UserService(CatalogContext context, IConfiguration configuration)
         {
             _context = context;
-            _appSettings = appSettings;
+            _Configuration = configuration;
         }
 
         public AuthenticateResponse Authenticate(string email, string password)
@@ -79,7 +80,8 @@ namespace CatalogApi.Services
         {
             // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var key2 = _Configuration.GetSection("AppSettings:Secret").Value;
+            var key = Encoding.ASCII.GetBytes(key2);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

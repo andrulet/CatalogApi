@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CatalogApi.Models
+namespace CatalogApi.Models.Users
 {
-    public class AuthenticateRequest
+    public class AuthenticateModel
     {
         [Required]
         public string Email { get; set; }
