@@ -1,4 +1,5 @@
-﻿using CatalogApi.Entities;
+﻿using System;
+using CatalogApi.Entities;
 
 namespace CatalogApi.Models
 {
@@ -10,7 +11,9 @@ namespace CatalogApi.Models
 
         public string LastName { get; set; }
 
-        public string Username { get; set; }
+        public string Email { get; set; }
+
+        public DateTime BirthDay { get; set; }
 
         public string Token { get; set; }
 
@@ -23,7 +26,9 @@ namespace CatalogApi.Models
 
             LastName = user.LastName;
 
-            Username = user.Username;
+            Email = user.Email;
+
+            BirthDay = user.BirthDay;
 
             Token = token;
         }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
 
 namespace CatalogApi.Entities
 {    
@@ -10,11 +10,12 @@ namespace CatalogApi.Entities
         
         public string LastName { get; set; }
 
-        public string Username { get; set; }
-
         public string Email { get; set; }
 
-        [JsonIgnore]
-        public string Password { get; set; }
+        public DateTime BirthDay { get; set; }
+
+        public byte[] PasswordHash { get; set; }
+
+        public byte[] PasswordSalt { get; set; }
     }
 }

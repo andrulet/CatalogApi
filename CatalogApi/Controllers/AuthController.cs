@@ -1,38 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CatalogApi.Models;
 using CatalogApi.Services;
-using CatalogApi.Helpers;
 
 namespace CatalogApi.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UsersController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public AuthController(IUserService userService)
         {
             _userService = userService;
         }
 
+        [HttpPost("login")]
         [HttpPost("authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model)
         {
-            var response = _userService.Authenticate(model);
+            var response = _userService.Authenticate(model.Email, model.Password);
 
             if (response == null)
                 return BadRequest(new { message = "Username or password is incorrect" });
 
             return Ok(response);
-        }
-
-        [Authorize]
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var users = _userService.GetAll();
-            return Ok(users);
         }
     }
 }

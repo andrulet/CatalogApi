@@ -1,7 +1,9 @@
 using CatalogApi.Helpers;
+using CatalogApi.Models;
 using CatalogApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,11 +20,13 @@ namespace CatalogApi
 
         // add services to the DI container
         public void ConfigureServices(IServiceCollection services)
-        {
+        {            
+            services.AddDbContext<CatalogContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CatalogApiDatabase")));
+
             services.AddCors();
             services.AddControllers();
 
-            // configure strongly typed settings object
+            
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // configure DI for application services
