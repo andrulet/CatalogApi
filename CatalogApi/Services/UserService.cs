@@ -1,9 +1,10 @@
 ﻿using CatalogApi.Entities;
 using CatalogApi.Helpers;
-using CatalogApi.Models;
+using CatalogApi.Models.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -18,18 +19,20 @@ namespace CatalogApi.Services
         User Create(User user, string password);
 
         User GetById(int id);
+
+        IEnumerable<User> GetAll();
     }
 
     public class UserService : IUserService
     {
-        private readonly IConfiguration _Configuration;
+        private readonly IConfiguration _configuration;
 
         private CatalogContext _context;
 
         public UserService(CatalogContext context, IConfiguration configuration)
         {
             _context = context;
-            _Configuration = configuration;
+            _configuration = configuration;
         }
 
         public AuthenticateResponse Authenticate(string email, string password)
@@ -45,7 +48,7 @@ namespace CatalogApi.Services
             if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
 
-            var token = generateJwtToken(user);
+            var token = GenerateJwtToken(user);
             return new AuthenticateResponse(user, token);
         }
 
@@ -73,15 +76,19 @@ namespace CatalogApi.Services
         {
             return _context.Users.Find(id);
         }
+        
+        public IEnumerable<User> GetAll()
+        {
+            return _context.Users;
+        }
 
         // helper methods        
 
-        private string generateJwtToken(User user)
+        private string GenerateJwtToken(User user)
         {
             // generate token that is valid for 7 days
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key2 = _Configuration.GetSection("AppSettings:Secret").Value;
-            var key = Encoding.ASCII.GetBytes(key2);
+            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:Secret").Value);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -1,21 +1,21 @@
 ﻿using System;
 using CatalogApi.Entities;
 
-namespace CatalogApi.Models
+namespace CatalogApi.Models.Users
 {
     public class AuthenticateResponse
     {
-        public int Id { get; set; }
+        public int Id { get;}
 
-        public string FirstName { get; set; }
+        public string FirstName { get; }
 
-        public string LastName { get; set; }
+        public string LastName { get; }
 
-        public string Email { get; set; }
+        public string Email { get; }
 
-        public DateTime BirthDay { get; set; }
+        public DateTime BirthDay { get; }
 
-        public string Token { get; set; }
+        public string Token { get; }
 
 
         public AuthenticateResponse(User user, string token)

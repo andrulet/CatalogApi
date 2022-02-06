@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using CatalogApi.Services;
 using CatalogApi.Helpers;
 using CatalogApi.Entities;
@@ -36,7 +37,7 @@ namespace CatalogApi.Controllers
         {
             // map model to entity
             var user = _mapper.Map<User>(model);
-
+            user.IsAdmin = false;
             try
             {
                 // create user
