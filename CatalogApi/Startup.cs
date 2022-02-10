@@ -33,6 +33,8 @@ namespace CatalogApi
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IFilmService, FilmService>();
+            services.AddScoped<ICommentsService, CommentsService>();
         }
 
         // configure the HTTP request pipeline

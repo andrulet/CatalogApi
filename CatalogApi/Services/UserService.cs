@@ -14,7 +14,7 @@ namespace CatalogApi.Services
 {
     public interface IUserService
     {
-        AuthenticateResponse Authenticate(string email, string password);
+        AuthenticateResponseUser Authenticate(string email, string password);
 
         User Create(User user, string password);
 
@@ -27,7 +27,7 @@ namespace CatalogApi.Services
     {
         private readonly IConfiguration _configuration;
 
-        private CatalogContext _context;
+        private readonly CatalogContext _context;
 
         public UserService(CatalogContext context, IConfiguration configuration)
         {
@@ -35,7 +35,7 @@ namespace CatalogApi.Services
             _configuration = configuration;
         }
 
-        public AuthenticateResponse Authenticate(string email, string password)
+        public AuthenticateResponseUser Authenticate(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 return null;
@@ -49,7 +49,7 @@ namespace CatalogApi.Services
                 return null;
 
             var token = GenerateJwtToken(user);
-            return new AuthenticateResponse(user, token);
+            return new AuthenticateResponseUser(user, token);
         }
 
         public User Create(User user, string password)
@@ -58,7 +58,7 @@ namespace CatalogApi.Services
                 throw new AppException("Password is required");
 
             if (_context.Users.Any(x => x.Email == user.Email))
-                throw new AppException("Username \"" + user.Email + "\" is already taken");
+                throw new AppException("Username '" + user.Email + "' is already taken");
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -115,8 +115,8 @@ namespace CatalogApi.Services
 
         private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
         {
-            if (password == null) throw new ArgumentNullException("password");
-            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+            if (password == null) throw new ArgumentNullException(nameof(password));
+            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", nameof(password));
             if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
             if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
 

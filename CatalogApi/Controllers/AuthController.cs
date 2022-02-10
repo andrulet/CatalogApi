@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using CatalogApi.Services;
 using CatalogApi.Helpers;
 using CatalogApi.Entities;
@@ -22,7 +21,7 @@ namespace CatalogApi.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Authenticate(AuthenticateModel authenticateModel)
+        public IActionResult Authenticate(AuthenticateModelUser authenticateModel)
         {
             var response = _userService.Authenticate(authenticateModel.Email, authenticateModel.Password);
 
@@ -33,7 +32,7 @@ namespace CatalogApi.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register(RegisterModel model)
+        public IActionResult Register(RegisterModelUser model)
         {
             // map model to entity
             var user = _mapper.Map<User>(model);

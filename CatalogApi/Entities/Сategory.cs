@@ -10,6 +10,7 @@
         Mystery,
         Romance,
         Thriller,
-        Western
+        Western,
+        Fantastic
     }
 }

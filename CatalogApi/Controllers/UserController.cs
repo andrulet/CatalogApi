@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using CatalogApi.Services;
 using CatalogApi.Helpers;
 using AutoMapper;
@@ -21,12 +20,11 @@ namespace CatalogApi.Controllers
         }
         
         [Admin]
-        [Authorize]
         [HttpGet("{id:int}/info")]
         public IActionResult GetById(int id)
         {
             var user = _userService.GetById(id);
-            var model = _mapper.Map<UserModel>(user); 
+            var model = _mapper.Map<UserResponse>(user); 
             return Ok(model);
         }
     }

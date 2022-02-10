@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CatalogApi.Models.Users
 {
-    public class RegisterModel
+    public class RegisterModelUser
     {
         [Required]
         public string FirstName { get; set; }

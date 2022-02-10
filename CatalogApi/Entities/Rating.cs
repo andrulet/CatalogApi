@@ -11,7 +11,5 @@ namespace CatalogApi.Entities
         public int FilmId { get; set; }
         
         public int ValueRating { get; set; }
-        
-        public DateTime DateCreate { get; set; }
     }
 }

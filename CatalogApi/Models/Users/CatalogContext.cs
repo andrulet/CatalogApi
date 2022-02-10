@@ -16,5 +16,13 @@ namespace CatalogApi.Models.Users
             //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<Film>()
+                .Property(e => e.Category)
+                .HasConversion<string>();
+        }
     }
 }

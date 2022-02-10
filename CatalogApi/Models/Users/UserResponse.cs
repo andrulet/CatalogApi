@@ -2,7 +2,7 @@
 
 namespace CatalogApi.Models.Users
 {
-    public class UserModel
+    public class UserResponse
     {
         public int Id { get; set; }
         public string FirstName { get; set; }

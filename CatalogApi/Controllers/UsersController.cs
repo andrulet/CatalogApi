@@ -26,7 +26,7 @@ namespace CatalogApi.Controllers
         public IActionResult GetAll()
         {
             var users = _userService.GetAll();
-            var model = _mapper.Map<IList<UserModel>>(users); 
+            var model = _mapper.Map<IList<UserResponse>>(users); 
             return Ok(model);
         }
     }
