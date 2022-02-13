@@ -10,7 +10,7 @@ namespace CatalogApi.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateCreateFilm { get; set; }
-        public List<Comment> Comments { get; set; }
+        public List<Comment> Comments { get; set; } = new List<Comment>();
     }
     
     

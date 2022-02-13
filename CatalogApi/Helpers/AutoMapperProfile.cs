@@ -10,7 +10,7 @@ namespace CatalogApi.Helpers
     {
         public AutoMapperProfile()
         {            
-            CreateMap<RegisterModelUser, User>();
+            CreateMap<RegisterRequest, User>();
             CreateMap<User, UserResponse>();
             CreateMap<CreateModelFilm, Film>();
             CreateMap<EditModelFilm, Film>();

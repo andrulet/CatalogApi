@@ -21,7 +21,6 @@ namespace CatalogApi.Controllers
         }
         
         [Admin]
-        [Authorize]
         [HttpGet("all")]
         public IActionResult GetAll()
         {

@@ -22,20 +22,20 @@ namespace CatalogApi.Services
     {
         private readonly CatalogContext _context;
         private readonly IMapper _mapper;
-        private readonly IFilmService _filmService;
+        private readonly IUserService _userService;
         
-        public CommentsService(CatalogContext context, IMapper mapper, IFilmService filmService)
+        public CommentsService(CatalogContext context, IMapper mapper, IFilmService filmService, IUserService userService)
         {
             _context = context;
             _mapper = mapper;
-            _filmService = filmService;
+            _userService = userService;
         }
         
         public CommentResponse Create(CreateCommentRequest request)
         {
             var com = _mapper.Map<Comment>(request); 
             com.DateCreate = DateTime.Now;
-            com.Film = _filmService.GetById(com.FilmId);
+            com.Film = _context.Films.Find(com.FilmId);
             _context.Comments.Add(com);
             _context.SaveChanges();
             return _mapper.Map<CommentResponse>(_context.Comments.Find(com.Id));
@@ -63,7 +63,8 @@ namespace CatalogApi.Services
 
         public IEnumerable<Comment> GetCommentsByFilmId(int id)
         {
-            return _context.Comments.Where(x => x.Id == id).Include(y => y.User.FirstName);
+            return _mapper.Map<IEnumerable<Comment>>(_context.Comments.Where(x => x.Id == id)
+                .Include(y => y.User.FirstName));
         }
 
         private Comment GetById(int id)
