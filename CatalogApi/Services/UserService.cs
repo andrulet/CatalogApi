@@ -9,67 +9,96 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 
 namespace CatalogApi.Services
 {
     public interface IUserService
     {
-        AuthenticateResponseUser Authenticate(string email, string password);
+        AuthenticateResponse Authenticate(AuthenticateRequest authenticateRequest, string ipAdress);
 
-        User Create(User user, string password);
+        AuthenticateResponse Register(RegisterRequest registerModelUser, string ipAdress);
 
         User GetById(int id);
 
         IEnumerable<User> GetAll();
+
+        void RevokeToken(string token, string ipAdress);
     }
 
     public class UserService : IUserService
     {
+        private IJwtUtils _jwtUtils;
+        private CatalogContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
+         
 
-        private readonly CatalogContext _context;
-
-        public UserService(CatalogContext context, IConfiguration configuration)
+        public UserService(CatalogContext context, IConfiguration configuration, IMapper mapper, IJwtUtils jwtUtils)
         {
             _context = context;
             _configuration = configuration;
+            _mapper = mapper;
+            _jwtUtils = jwtUtils;
         }
 
-        public AuthenticateResponseUser Authenticate(string email, string password)
+        public AuthenticateResponse Authenticate(AuthenticateRequest authenticateModel, string ipAdress)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(authenticateModel.Email) || string.IsNullOrEmpty(authenticateModel.Password))
                 return null;
 
-            var user = _context.Users.SingleOrDefault(x => x.Email == email);
+            var user = _context.Users.SingleOrDefault(x => x.Email == authenticateModel.Email);
             
-            if (user == null)
+            if (user == null || !VerifyPasswordHash(authenticateModel.Password, user.PasswordHash, user.PasswordSalt))
                 return null;
             
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
-                return null;
-
-            var token = GenerateJwtToken(user);
-            return new AuthenticateResponseUser(user, token);
+            var jwtToken = _jwtUtils.GenerateJwtToken(user);
+            var refreshToken = _jwtUtils.GenerateRefreshToken(ipAdress);
+            user.RefreshTokens.Add(refreshToken);
+            
+            // remove old refresh tokens from user
+            RemoveOldRefreshTokens(user);
+            
+            _context.Update(user);
+            _context.SaveChanges();
+            return new AuthenticateResponse(user, jwtToken, refreshToken.Token);
         }
 
-        public User Create(User user, string password)
+        public AuthenticateResponse Register(RegisterRequest model,string ipAdress)
         {            
-            if (string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(model.Password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Email == user.Email))
-                throw new AppException("Username '" + user.Email + "' is already taken");
+            if (_context.Users.Any(x => x.Email == model.Email))
+                throw new AppException("Username '" + model.Email + "' is already taken");
 
-            byte[] passwordHash, passwordSalt;
-            CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
+            var user = _mapper.Map<User>(model);
+            CreatePasswordHash(model.Password, out var passwordHash, out var passwordSalt);
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
+            var jwtToken = _jwtUtils.GenerateJwtToken(user);
+            var refreshToken = _jwtUtils.GenerateRefreshToken(ipAdress);
+            user.RefreshTokens.Add(refreshToken);
+            RemoveOldRefreshTokens(user);
             _context.Users.Add(user);
             _context.SaveChanges();
+            
+            return new AuthenticateResponse(user, jwtToken, refreshToken.Token);
+        }
+        
+        public void RevokeToken(string token, string ipAddress)
+        {
+            var user = GetUserByRefreshToken(token);
+            var refreshToken = user.RefreshTokens.Single(x => x.Token == token);
 
-            return user;
+            if (!refreshToken.IsActive)
+                throw new AppException("Invalid token");
+
+            // revoke token and save
+            RevokeRefreshToken(refreshToken, ipAddress, "Revoked without replacement");
+            _context.Update(user);
+            _context.SaveChanges();
         }
 
         public User GetById(int id)
@@ -82,23 +111,32 @@ namespace CatalogApi.Services
             return _context.Users;
         }
 
-        // helper methods        
-
-        private string GenerateJwtToken(User user)
+        // helper methods
+        private User GetUserByRefreshToken(string token)
         {
-            // generate token that is valid for 7 days
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("AppSettings:Secret").Value);
+            var user = _context.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+            if (user == null)
+                throw new AppException("Invalid token");
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return user;
+        }
+        
+        private void RevokeRefreshToken(RefreshToken token, string ipAddress, string reason = null, string replacedByToken = null)
+        {
+            token.Revoked = DateTime.UtcNow;
+            token.RevokedByIp = ipAddress;
+            token.ReasonRevoked = reason;
+            token.ReplacedByToken = replacedByToken;
+        }
+        
+        private void RemoveOldRefreshTokens(User user)
+        {
+            var z = Convert.ToInt32(_configuration.GetSection("AppSettings:RefreshTokenTTL").Value);
+            // remove old inactive refresh tokens from user based on TTL in app settings
+            user.RefreshTokens.RemoveAll(x => 
+                !x.IsActive && 
+                x.Created.AddDays(z) <= DateTime.UtcNow);
         }
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)

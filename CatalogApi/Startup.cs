@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using CatalogApi.Controllers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CatalogApi
 {
@@ -24,7 +25,6 @@ namespace CatalogApi
         public void ConfigureServices(IServiceCollection services)
         {            
             services.AddDbContext<CatalogContext>(options => options.UseSqlServer(Configuration.GetConnectionString("CatalogApiDatabase")));
-
             services.AddCors();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -32,6 +32,8 @@ namespace CatalogApi
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // configure DI for application services
+            
+            services.AddSingleton<IJwtUtils, JwtUtils>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFilmService, FilmService>();
             services.AddScoped<ICommentsService, CommentsService>();
@@ -44,10 +46,14 @@ namespace CatalogApi
 
             // global cors policy
             app.UseCors(x => x
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(origin => true)
                 .AllowAnyMethod()
-                .AllowAnyHeader());
+                .AllowAnyHeader()
+                .AllowCredentials());
 
+            // global error handler
+            app.UseMiddleware<ErrorHandlerMiddleware>();
+            
             // custom jwt auth middleware
             app.UseMiddleware<JwtMiddleware>();
 

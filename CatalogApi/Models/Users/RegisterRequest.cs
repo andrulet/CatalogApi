@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CatalogApi.Models.Users
 {
-    public class RegisterModelUser
+    public class RegisterRequest
     {
         [Required]
         public string FirstName { get; set; }
@@ -19,5 +19,7 @@ namespace CatalogApi.Models.Users
 
         [Required]
         public string Password { get; set; }
+
+        public bool IsAdmin { get; } = false;
     }
 }

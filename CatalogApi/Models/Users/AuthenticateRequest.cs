@@ -2,7 +2,7 @@
 
 namespace CatalogApi.Models.Users
 {
-    public class AuthenticateModelUser
+    public class AuthenticateRequest
     {
         [Required]
         public string Email { get; set; }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
@@ -8,7 +7,6 @@ using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace CatalogApi.Services
 {
@@ -89,10 +87,11 @@ namespace CatalogApi.Services
 
         public IEnumerable<CommentFilmResponse> GetComments(int id)
         {
-            if (_context.Films.Find(id) == null)
+            Film film;
+            if ((film = GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
-            var film = _context.Films.Include(u => u.Comments).FirstOrDefault(x => x.Id == id);
-            return _mapper.Map<IList<CommentFilmResponse>>(film?.Comments);
+            _context.Entry(film).Collection(t=>t.Comments).Load();
+            return _mapper.Map<IList<CommentFilmResponse>>(film.Comments);
         }
     }
 }

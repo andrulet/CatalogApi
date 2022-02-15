@@ -14,7 +14,6 @@ namespace CatalogApi.Controllers
     public class FilmController : ControllerBase
     {
         private readonly IFilmService _filmService;
-        
         public FilmController(IFilmService filmService)
         {
             _filmService = filmService;
