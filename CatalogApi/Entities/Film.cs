@@ -11,7 +11,6 @@ namespace CatalogApi.Entities
         public string Description { get; set; }
         public DateTime DateCreateFilm { get; set; }
         public List<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
-    
-    
 }

@@ -3,6 +3,7 @@ using CatalogApi.Entities;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Users;
 using CatalogApi.Models.Films;
+using CatalogApi.Models.Rating;
 
 namespace CatalogApi.Helpers
 {
@@ -17,7 +18,7 @@ namespace CatalogApi.Helpers
             CreateMap<CreateCommentRequest, Comment>();
             CreateMap<Comment, CommentResponse>();
             CreateMap<EditCommentRequest, Comment>();
-            CreateMap<Comment, CommentFilmResponse>();
+            CreateMap<SetRatingOnFilm, Rating>();
         }
     }
 }

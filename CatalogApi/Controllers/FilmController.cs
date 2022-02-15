@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
+using CatalogApi.Models.Rating;
 using CatalogApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +14,12 @@ namespace CatalogApi.Controllers
     public class FilmController : ControllerBase
     {
         private readonly IFilmService _filmService;
+
         public FilmController(IFilmService filmService)
         {
             _filmService = filmService;
         }
-        
+
         [Admin]
         [Authorize]
         [HttpPost("create")]
@@ -28,15 +29,15 @@ namespace CatalogApi.Controllers
             {
                 // create film
                 _filmService.Create(model);
-                return Ok(new { message = $"Film {model.Title} was added!" });
+                return Ok(new {message = $"Film {model.Title} was added!"});
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new {message = ex.Message});
             }
         }
-        
+
         [Admin]
         [Authorize]
         [HttpPut("{id:int}/edit")]
@@ -46,15 +47,15 @@ namespace CatalogApi.Controllers
             {
                 // edit film
                 _filmService.Edit(id, model);
-                return Ok(new { message = $"Film {model.Title} was changed!" });
+                return Ok(new {message = $"Film {model.Title} was changed!"});
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new {message = ex.Message});
             }
         }
-        
+
         [Admin]
         [Authorize]
         [HttpDelete("{id:int}/delete")]
@@ -64,16 +65,15 @@ namespace CatalogApi.Controllers
             {
                 // edit film
                 _filmService.Delete(id);
-                return Ok(new { message = $"Film was delete!" });
+                return Ok(new {message = $"Film was delete!"});
             }
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new {message = ex.Message});
             }
         }
-        
-        [Authorize]
+
         [HttpGet("{filmId:int}/comments")]
         public ActionResult<IList<CommentFilmResponse>> GetComments(int filmId)
         {
@@ -85,7 +85,38 @@ namespace CatalogApi.Controllers
             catch (AppException ex)
             {
                 // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new {message = ex.Message});
+            }
+        }
+
+        [HttpPut("set_score")]
+        public IActionResult SetScoreOnFilmByUser(SetRatingOnFilm request)
+        {
+            try
+            {
+                // set rating
+                _filmService.SetRating(request);
+                return Ok(new {message = $"Set mark {request.ValueRating} "});
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new {message = ex.Message});
+            }
+        }
+
+        [HttpGet("{filmId:int}info")]
+        public IActionResult GetInfoAboutFilm(int filmId)
+        {
+            try
+            {
+                // get info about film
+                return Ok(_filmService.GetInfoFilmById(filmId));
+            }
+            catch (AppException ex)
+            {
+                // return error message if there was an exception
+                return BadRequest(new {message = ex.Message});
             }
         }
     }

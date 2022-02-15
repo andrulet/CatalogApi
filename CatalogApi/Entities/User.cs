@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace CatalogApi.Entities
 {    
@@ -8,8 +8,10 @@ namespace CatalogApi.Entities
     {        
         public int Id { get; set; }
         public string FirstName { get; set; }
+        
         public string LastName { get; set; }
         public string Email { get; set; }
+        
         public DateTime BirthDay { get; set; }
         
         [JsonIgnore]
@@ -20,9 +22,9 @@ namespace CatalogApi.Entities
         
         [JsonIgnore]
         public bool IsAdmin { get; set; }
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         
-        public List<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 
-        [JsonIgnore] public List<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }

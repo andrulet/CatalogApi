@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="catalogdb" uuid="00642134-12d5-4916-bd41-7961d9029811">
+    <data-source source="LOCAL" name="catalogdb" uuid="ba7c44a7-6838-43c1-80e6-d33013e385b7">
       <driver-ref>sqlserver.localdb.jtds</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>

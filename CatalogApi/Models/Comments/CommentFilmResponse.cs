@@ -1,12 +1,21 @@
 ﻿using System;
+using CatalogApi.Entities;
 
 namespace CatalogApi.Models.Comments
 {
     public class CommentFilmResponse
     {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string Content { get; set; }
-        public DateTime DateCreate { get; set; }
+        public int CommentId { get;}
+        public string Content { get;}
+        public DateTime DateCreate { get;}
+        public string FirstName { get;}
+
+        public CommentFilmResponse(Comment comment)
+        {
+            CommentId = comment.Id;
+            FirstName = comment.User.FirstName;
+            Content = comment.Content;
+            DateCreate = comment.DateCreate;
+        }
     }
 }
