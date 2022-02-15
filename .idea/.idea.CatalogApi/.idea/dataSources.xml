@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="catalogdb" uuid="ba7c44a7-6838-43c1-80e6-d33013e385b7">
+    <data-source source="LOCAL" name="catalogfilmdb" uuid="27944f8e-a6cf-4c68-a9df-5f014f4d3424">
       <driver-ref>sqlserver.localdb.jtds</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>net.sourceforge.jtds.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:jtds:sqlserver://./catalogdb</jdbc-url>
+      <jdbc-url>jdbc:jtds:sqlserver://./catalogfilmdb</jdbc-url>
       <jdbc-additional-properties>
         <property name="LOCAL_DB_INSTANCE" value="MSSQLLocalDB" />
       </jdbc-additional-properties>

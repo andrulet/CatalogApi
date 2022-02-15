@@ -1,21 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CatalogApi.Entities;
 
-namespace CatalogApi.Models.Users
+namespace CatalogApi.Models
 {
-    public class CatalogContext : DbContext
+    public sealed class CatalogContext : DbContext
     {
+        public CatalogContext(DbContextOptions<CatalogContext> options) : base(options)
+        {
+            Database.EnsureCreated();
+        }
+        
         public DbSet<User> Users { get; set; }
         public DbSet<Film> Films { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Entities.Rating> Ratings { get; set; }
 
-        public CatalogContext(DbContextOptions<CatalogContext> options) : base(options)
-        {
-            //Database.EnsureDeleted();
-            //Database.EnsureCreated();
-        }
-        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder

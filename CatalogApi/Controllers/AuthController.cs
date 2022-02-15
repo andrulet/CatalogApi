@@ -12,12 +12,10 @@ namespace CatalogApi.Controllers
     public class AuthController : ControllerBase
     {
         private IUserService _userService;
-        private IMapper _mapper;
 
-        public AuthController(IUserService userService, IMapper mapper)
+        public AuthController(IUserService userService)
         {
             _userService = userService;
-            _mapper = mapper;
         }
 
         [HttpPost("login")]

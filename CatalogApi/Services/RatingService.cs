@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
+using CatalogApi.Models;
 using CatalogApi.Models.Rating;
 using CatalogApi.Models.Users;
 using Microsoft.Data.SqlClient;
@@ -13,7 +14,7 @@ namespace CatalogApi.Services
     public interface IRatingService
     {
         void SetRating(SetRatingOnFilm request);
-        double GetRatingByFilmTitle(string titleFilm);
+        double GetRatingByFilmTitle(int filmid);
     }
     public class RatingService : IRatingService
     {
@@ -36,7 +37,7 @@ namespace CatalogApi.Services
             _context.SaveChanges();
         }
 
-        public double GetRatingByFilmTitle(string titleFilm)
+        public double GetRatingByFilmTitle(int filmid)
         {
             double rating;
             using(_context)
@@ -44,23 +45,22 @@ namespace CatalogApi.Services
                 /*System.Data.SqlClient.SqlParameter param = new System.Data.SqlClient.SqlParameter("@name", titleFilm);
                 var phones = _context.Database.ExecuteSqlRaw("Get_Score @name",param);*/
                 
-                string sqlExpression = "Get_Score"; 
+                var sqlExpression = "Get_Score"; 
  
-                using (SqlConnection connection = new SqlConnection(_context.Database.GetConnectionString()))
+                using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
                 {
                     connection.Open();
-                    SqlCommand command = new SqlCommand(sqlExpression, connection);
+                    var command = new SqlCommand(sqlExpression, connection);
                     command.CommandType = CommandType.StoredProcedure;
-                    SqlParameter title = new SqlParameter
+                    var id = new SqlParameter
                     {
-                        ParameterName = "@title",
-                        Value = titleFilm
+                        ParameterName = "@filmid",
+                        Value = filmid
                     };
                     
-                    command.Parameters.Add(title);
-                    
-                    
-                    SqlParameter score = new SqlParameter
+                    command.Parameters.Add(id);
+
+                    var score = new SqlParameter
                     {
                         ParameterName = "@score",
                         SqlDbType = SqlDbType.Float, 
@@ -68,8 +68,7 @@ namespace CatalogApi.Services
                     };
                  
                     command.Parameters.Add(score);
-
-                    var x = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                     rating = (double)command.Parameters["@score"].Value;
                 }
             }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using CatalogApi.Models;
 
 namespace CatalogApi.Services
 {

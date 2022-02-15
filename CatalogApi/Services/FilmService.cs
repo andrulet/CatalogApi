@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
+using CatalogApi.Models;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
@@ -43,7 +44,7 @@ namespace CatalogApi.Services
         public void Create(CreateModelFilm model)
         {
             var film = _mapper.Map<Film>(model);
-            if (_context.Films.Any(x => x.Title == film.Title))
+            if (_context.Films.Any(x => x.Title == model.Title))
                 throw new AppException("Film'" + film.Title + "' is already taken");
             _context.Films.Add(film);
             _context.SaveChanges();
@@ -101,7 +102,7 @@ namespace CatalogApi.Services
 
         private double GetRatingByFilmId(int id)
         {
-            return _ratingService.GetRatingByFilmTitle(GetById(id).Title);
+            return _ratingService.GetRatingByFilmTitle(id);
         }
     }
 }

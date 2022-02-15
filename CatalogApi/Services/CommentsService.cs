@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
+using CatalogApi.Models;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Users;
 using Microsoft.EntityFrameworkCore;

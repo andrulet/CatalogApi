@@ -21,7 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Models\Users\CatalogContext.cs">
+      <EmbeddedResource Include="SQL\Get_Score.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Models\CatalogContext.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
