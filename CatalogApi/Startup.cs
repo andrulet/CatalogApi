@@ -1,5 +1,4 @@
 using CatalogApi.Helpers;
-using CatalogApi.Models.Users;
 using CatalogApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,12 +7,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using CatalogApi.Models;
+using FileStorage;
 
 namespace CatalogApi
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
@@ -36,6 +36,7 @@ namespace CatalogApi
             services.AddScoped<IFilmService, FilmService>();
             services.AddScoped<ICommentsService, CommentsService>();
             services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IFileStorageService,FileStorageService>();
         }
 
         // configure the HTTP request pipeline

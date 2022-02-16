@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogApi", "CatalogApi\CatalogApi.csproj", "{088C6BAC-DBC1-4BB5-8BEB-ACAC955DD4BE}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FileStorage", "FileStorage\FileStorage.vbproj", "{41BA0D5E-C24E-45BA-8A6C-13816F83EE1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{088C6BAC-DBC1-4BB5-8BEB-ACAC955DD4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{088C6BAC-DBC1-4BB5-8BEB-ACAC955DD4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{088C6BAC-DBC1-4BB5-8BEB-ACAC955DD4BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41BA0D5E-C24E-45BA-8A6C-13816F83EE1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41BA0D5E-C24E-45BA-8A6C-13816F83EE1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41BA0D5E-C24E-45BA-8A6C-13816F83EE1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41BA0D5E-C24E-45BA-8A6C-13816F83EE1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

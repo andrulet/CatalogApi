@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CatalogApi.Services;
 using CatalogApi.Helpers;
-using CatalogApi.Entities;
-using AutoMapper;
 using CatalogApi.Models.Users;
 
 namespace CatalogApi.Controllers

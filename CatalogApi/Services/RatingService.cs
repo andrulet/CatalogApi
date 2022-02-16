@@ -5,9 +5,8 @@ using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models;
 using CatalogApi.Models.Rating;
-using CatalogApi.Models.Users;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace CatalogApi.Services
 {
