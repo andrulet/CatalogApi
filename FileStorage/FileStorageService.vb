@@ -1,25 +1,21 @@
 Imports System.IO
+Imports Microsoft.AspNetCore.Http
+
 Public Interface IFileStorageService
-    Sub Upload(imageInByte As Byte(), id As Int32)
-    Function Download(id As Int32) As byte()
+    Sub Upload(file As IFormFile, path As String)
+    Function Download(path As String) As FileStream
 End Interface
 
 Public Class FileStorageService 
     Implements IFileStorageService
-    Private ReadOnly _path = "\Files\Images\"
     
-    Public Sub Upload(imageInByte As Byte(), id As Integer) Implements IFileStorageService.Upload
-        Using stream As New FileStream(_path & id & ".jpg", FileMode.OpenOrCreate)
-            stream.Write(imageInByte, 0, imageInByte.Length)
+    Public Sub Upload(file As IFormFile, path As String) Implements IFileStorageService.Upload
+        Using stream As New FileStream(path, FileMode.Create)
+            file.CopyTo(stream)
         End Using
     End Sub
 
-    Public Function Download(id As Integer) As Byte() Implements IFileStorageService.Download
-        Dim array
-        Using stream As FileStream = File.OpenRead(_path & id & ".jpg")
-            array = New Byte(stream.Length) {}
-            stream.Read(array, 0, array.Length)
-        End Using
-        Return array
+    Public Function Download(path As String) As FileStream Implements IFileStorageService.Download
+        return new FileStream(path, FileMode.Open)
     End Function
 End Class
