@@ -1,5 +1,6 @@
-﻿using FileStorage;
-using CatalogApi.Helpers;
+﻿using CatalogApi.Helpers;
+using CatalogApi.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogApi.Controllers;
@@ -8,21 +9,35 @@ namespace CatalogApi.Controllers;
 [Route("[controller]")]
 public class FileStorageController: ControllerBase
 {
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IFilmService _filmService;
 
-    public FileStorageController(IFileStorageService fileStorageService)
+    public FileStorageController(IFilmService filmService)
     {
-        _fileStorageService = fileStorageService;
+        _filmService = filmService;
     }
     
-    [Authorize]
+    [Admin]
     [HttpPost("upload")]
-    public IActionResult UploadImage(int id, byte[] array)
+    public IActionResult UploadImage(IFormFile file, int id)
     {
         try
         {
-            _fileStorageService.Upload(array, id);
+            _filmService.UploadImage(file, id);
             return Ok(new {message = $"Image was added!"});
+        }
+        catch (AppException ex)
+        {
+            return BadRequest(new {message = ex.Message});
+        }
+    }
+    
+    [Admin]
+    [HttpGet("download/{fileId:int}")]
+    public IActionResult DownloadImage(int fileId)
+    {
+        try
+        {
+            return _filmService.DownloadImage(fileId);
         }
         catch (AppException ex)
         {

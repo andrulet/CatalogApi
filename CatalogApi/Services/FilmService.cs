@@ -1,4 +1,7 @@
+using System;
+using FileStorage;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
@@ -7,8 +10,10 @@ using CatalogApi.Models;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
-using CatalogApi.Models.Users;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace CatalogApi.Services
 {
@@ -26,6 +31,10 @@ namespace CatalogApi.Services
         IEnumerable<CommentFilmResponse> GetComments(int id);
         
         void SetRating(SetRatingOnFilm request);
+
+        void UploadImage(IFormFile file, int idFilm);
+        
+        IActionResult DownloadImage(int idFilm);
     }
     
     public class FilmService : IFilmService
@@ -33,12 +42,16 @@ namespace CatalogApi.Services
         private readonly CatalogContext _context;
         private readonly IMapper _mapper;
         private readonly IRatingService _ratingService;
+        private readonly IFileStorageService _fileStorageService;
+        private readonly string _path;
         
-        public FilmService(CatalogContext context, IMapper mapper, IRatingService ratingService)
+        public FilmService(CatalogContext context, IConfiguration configuration, IMapper mapper, IRatingService ratingService, IFileStorageService fileStorageService)
         {
             _context = context;
             _mapper = mapper;
             _ratingService = ratingService;
+            _fileStorageService = fileStorageService;
+            _path = configuration.GetSection("ConnectionStrings:PathToImages").Value;
         }
 
         public void Create(CreateModelFilm model)
@@ -77,13 +90,10 @@ namespace CatalogApi.Services
 
         public IEnumerable<CommentFilmResponse> GetComments(int id)
         {
-            Film film;
-            if ((film = GetById(id)) == null)
+            if (GetById(id) == null)
                 throw new AppException("Incorrect Id = " + id);
-            _context.Comments.Include(c =>c.User).ToList();
-            _context.SaveChanges();
+            var comments = _context.Comments.Include(c =>c.User).ToList();
             var y = this.GetById(id).Comments;
-            var z = GetRatingByFilmId(id);
             return y.Select(x => new CommentFilmResponse(x));
         }
 
@@ -98,6 +108,25 @@ namespace CatalogApi.Services
             if ((film = _context.Films.Find(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
             return film;
+        }
+
+        public void UploadImage(IFormFile file, int idFilm)
+        {
+            var film = GetById(idFilm);
+            var pathFile = string.IsNullOrEmpty(film.Path) ? _path + DateTime.Now.Ticks + "." + file.ContentType.Split('/').Last() : film.Path;
+            _fileStorageService.Upload(file, pathFile);
+            film.Path = pathFile;
+            _context.SaveChanges();
+        }
+
+        public IActionResult DownloadImage(int idFilm)
+        {
+            var film = GetById(idFilm);
+            var pathFile = film.Path;
+            if (string.IsNullOrEmpty(pathFile))
+                throw new AppException("Path is null");
+            var stream = _fileStorageService.Download(pathFile);
+            return new FileStreamResult(stream, "image/" + film.Path.Split(".").Last());
         }
 
         private double GetRatingByFilmId(int id)
