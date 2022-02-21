@@ -18,7 +18,7 @@ public class CollectionsController : ControllerBase
     
     [Authorize]
     [HttpGet("all")]
-    public IActionResult CreateCollection()
+    public IActionResult GetAll()
     {
         try
         {

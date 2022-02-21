@@ -17,7 +17,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
     public IEnumerable<T> GetAll()
     {
-        return _table.AsNoTracking().ToList();
+        return _table.ToList();
     }
 
     public T GetById(object id)
@@ -45,5 +45,18 @@ public class Repository<T> : IRepository<T> where T : class
     public void Save()
     {
         _context.SaveChanges();
+    }
+
+    public void LoadAllComments()
+    {
+        _context.Comments.Include(u => u.User).Load();
+    }
+    public void LoadAllUserInfoForCollections()
+    {
+        _context.Collections.Include(u=>u.User).Load();
+    }
+    public void LoadAllFilmInfoInCollections()
+    {
+        _context.Collections.Include(f => f.Films).Load();
     }
 }

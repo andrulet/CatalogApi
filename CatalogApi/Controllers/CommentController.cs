@@ -51,12 +51,12 @@ namespace CatalogApi.Controllers
         
         [Authorize]
         [HttpPut("edit/{id:int}")]
-        public IActionResult Edit(int id, EditCommentRequest message)
+        public IActionResult Edit(int id, EditCommentRequest request)
         {
             try
             {
                 // edit comment
-                _commentsService.Edit(id, message);
+                _commentsService.Edit(id, request);
                 return Ok(new { message = $"Your comment was edited." });
                 
             }

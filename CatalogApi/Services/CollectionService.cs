@@ -6,6 +6,7 @@ using CatalogApi.Helpers;
 using CatalogApi.Models;
 using CatalogApi.Models.Collections;
 using CatalogApi.Models.Films;
+using CatalogApi.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogApi.Services;
@@ -22,15 +23,19 @@ public interface ICollectionService
 
 public class CollectionService : ICollectionService
 {
-    private readonly CatalogContext _context;
+    private readonly IRepository<Collection> _collectionRepository;
     private readonly IMapper _mapper;
     private readonly IRatingService _ratingService;
+    private readonly IFilmService _filmService;
+    private readonly IUserService _userService;
     
-    public CollectionService(CatalogContext context, IMapper mapper, IRatingService ratingService)
+    public CollectionService(IRepository<Collection> collectionRepository, IMapper mapper, IRatingService ratingService, IFilmService filmService, IUserService userService)
     {
-        _context = context;
+        _collectionRepository = collectionRepository;
         _mapper = mapper;
+        _filmService = filmService;
         _ratingService = ratingService;
+        _userService = userService;
     }
 
 
@@ -39,44 +44,47 @@ public class CollectionService : ICollectionService
         if (request == null)
             throw new AppException(nameof(request) + "is null");
         var collection = _mapper.Map<Collection>(request);
-        collection.User = _context.Users.Find(collection.UserId);
-        _context.Collections.Add(collection);
-        _context.SaveChanges();
+        collection.User = _userService.GetById(request.UserId);
+        _collectionRepository.Insert(collection);
+        _collectionRepository.Save();
     }
 
     public void Delete(int collectionId)
     {
-        _context.Collections.Remove(GetById(collectionId));
-        _context.SaveChanges();
+        _collectionRepository.Delete(collectionId);
+        _collectionRepository.Save();
     }
 
     public IEnumerable<CollectionInfoResponse> GetAll(int userId)
     {
-        
-        var collections = _context.Collections.Where(x => x.IsPrivate == false | (x.IsPrivate == true && x.UserId == userId))
-            .Include(u=>u.User);
+        _collectionRepository.LoadAllUserInfoForCollections();
+        var collections = _collectionRepository.GetAll().Where(x => x.IsPrivate == false | (x.IsPrivate == true && x.UserId == userId));
         return collections.Select(x => new CollectionInfoResponse(x));
     }
 
     public void AddFilmIntoCollection(FilmAddIntoCollectionRequest response)
     {
-        var film = _context.Films.Find(response.FilmId);
-        if (_context.Collections.Find(response.CollectionId) == null)
+        var film = _filmService.GetById(response.FilmId);
+        if (_collectionRepository.GetById(response.CollectionId) == null)
             throw new AppException($"Incorrect {nameof(response.CollectionId)}");
-        if (_context.Collections.Include(f => f.Films).Any(x => x.Id == response.FilmId))
+        _collectionRepository.LoadAllFilmInfoInCollections();
+        if (_collectionRepository.GetAll().Any(x => x.Films.Any(z=>z.Id == response.FilmId)))
             throw new AppException($"This collection include this film {nameof(response.CollectionId)}");
-        _context.Collections.Find(response.CollectionId)?.Films.Add(film);
-        _context.SaveChanges();
+        _collectionRepository.GetById(response.CollectionId)?.Films.Add(film);
+        _collectionRepository.Save();
     }
 
     public CollectionInfoResponse EditCollection(int collectionId,CollectionEditRequest request)
     {
         Collection collection;
-        if (request == null | (collection = _context.Collections.Include(c =>c.User).FirstOrDefault(x=>x.Id == collectionId)) == null)
+        
+        if (request == null | (collection = _collectionRepository.GetAll().FirstOrDefault(x=>x.Id == collectionId)) == null)
             throw new AppException("Bad request");
         collection.Title = request.Title;
         collection.IsPrivate = request.IsPrivate;
-        _context.SaveChanges();
+        _collectionRepository.Update(collection);
+        _collectionRepository.Save();
+        _collectionRepository.LoadAllUserInfoForCollections();
         return new CollectionInfoResponse(collection);
     }
 
@@ -84,14 +92,14 @@ public class CollectionService : ICollectionService
     {
         if (GetById(collectionId) == null)
             throw new AppException("Incorrect Id = " + collectionId);
-        _context.Collections.Include(c =>c.Films).Load();
+        _collectionRepository.LoadAllFilmInfoInCollections();
         var films = GetById(collectionId).Films;
         return films.Select(x => new FilmInfoResponse(x, _ratingService.GetRatingByFilm(x.Id)));
     }
 
     private Collection GetById(int id)
     {
-        var collection = _context.Collections.Find(id);
+        var collection = _collectionRepository.GetById(id);
         if (collection == null)
             throw new AppException("Incorrect collection id");
         return collection;

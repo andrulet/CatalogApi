@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
-using CatalogApi.Models;
 using CatalogApi.Models.Comments;
-using Microsoft.EntityFrameworkCore;
+using CatalogApi.Repositories;
 
 namespace CatalogApi.Services
 {
@@ -19,13 +16,13 @@ namespace CatalogApi.Services
     
     public class CommentService: ICommentService
     {
-        private readonly CatalogContext _context;
+        private readonly IRepository<Comment> _commentRepository;
         private readonly IMapper _mapper;
         private readonly IFilmService _filmService;
         
-        public CommentService(CatalogContext context, IMapper mapper, IFilmService filmService)
+        public CommentService(IRepository<Comment> commentRepository, IMapper mapper, IFilmService filmService)
         {
-            _context = context;
+            _commentRepository = commentRepository;
             _mapper = mapper;
             _filmService = filmService;
         }
@@ -35,9 +32,9 @@ namespace CatalogApi.Services
             var com = _mapper.Map<Comment>(request); 
             com.DateCreate = DateTime.Now;
             com.Film = _filmService.GetById(com.FilmId);
-            _context.Comments.Add(com);
-            _context.SaveChanges();
-            return _mapper.Map<CommentResponse>(_context.Comments.Find(com.Id));
+            _commentRepository.Insert(com);
+            _commentRepository.Save();
+            return _mapper.Map<CommentResponse>(_commentRepository.GetById(com.Id));
         }
 
         public void Delete(int id)
@@ -45,25 +42,26 @@ namespace CatalogApi.Services
             Comment com;
             if ((com = GetById(id)) == null)
                 throw new AppException($"Invalid id = {id}");
-            _context.Comments.Remove(com);
-            _context.SaveChanges();
+            _commentRepository.Delete(id);
+            _commentRepository.Save();
         }
 
         public void Edit(int id, EditCommentRequest request)
         {
-            if (string.IsNullOrEmpty(request.Content))
+            if (string.IsNullOrEmpty(request.Content) || _commentRepository.GetById(id).UserId != request.UserId)
                 throw new AppException($"Message is Empty");
             var com = GetById(id);
             if (com == null)
                 throw new AppException("Incorrect Id");
             com.Content = request.Content;
-            _context.Comments.Update(com);
-            _context.SaveChanges();
+            com.DateCreate = DateTime.Now;
+            _commentRepository.Update(com);
+            _commentRepository.Save();
         }
 
         private Comment GetById(int id)
         {
-            return _context.Comments.Find(id);
+            return _commentRepository.GetById(id);
         }
     }
 }

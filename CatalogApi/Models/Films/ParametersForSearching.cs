@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CatalogApi.Entities;
 
 namespace CatalogApi.Models.Films;
@@ -14,5 +15,5 @@ public class ParametersForSearching
 
     public double MaxScore { get; set; } = 10.0;
 
-    public IEnumerable<Category> Categories { get; set; }
+    public IEnumerable<Category> Categories { get; set; } = (IEnumerable<Category>)Enum.GetValues(typeof(Category));
 }

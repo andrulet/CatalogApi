@@ -38,8 +38,6 @@ namespace CatalogApi.Services
         void UploadImage(IFormFile file, int idFilm);
         
         IActionResult DownloadImage(int idFilm);
-
-        double GetRatingByFilmId(int id);
         IEnumerable<FilmInfoResponse> SearchByKey(string keyQuery, string valueQuery);
         IEnumerable<FilmInfoResponse> SearchByFilter(Dictionary<string, StringValues> query);
     }
@@ -50,6 +48,7 @@ namespace CatalogApi.Services
         private readonly IMapper _mapper;
         private readonly IRatingService _ratingService;
         private readonly IFileStorageService _fileStorageService;
+        
         private readonly string _path;
         
         public FilmService(
@@ -105,18 +104,24 @@ namespace CatalogApi.Services
             if ((film = GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
             _filmRepository.GetAll();
-            //_context.Comments.Include(c =>c.User).Load();
-            var y = _filmRepository.GetAll().FirstOrDefault(x => x.Id == film.Id)?.Comments;
+            //_filmRepository(c =>c.User).Load();
+            _filmRepository.LoadAllComments();
+            var y = GetById(id).Comments;
             return y.Select(x => new CommentFilmResponse(x));
         }
 
         public void SetRating(SetRatingOnFilm request)
         {
+            if (GetById(request.FilmId) == null)
+            {
+                throw new AppException("There is no such film.");
+            }
             _ratingService.SetRating(request);
         }
         
         public Film GetById(int id)
         {
+            
             Film film;
             if ((film = _filmRepository.GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
