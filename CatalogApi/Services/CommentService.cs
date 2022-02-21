@@ -6,26 +6,24 @@ using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models;
 using CatalogApi.Models.Comments;
-using CatalogApi.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogApi.Services
 {
-    public interface ICommentsService
+    public interface ICommentService
     {
         CommentResponse Create(CreateCommentRequest request);
         void Delete(int id);
         void Edit(int id, EditCommentRequest request);
-        IEnumerable<Comment> GetCommentsByFilmId(int id);
     }
     
-    public class CommentsService: ICommentsService
+    public class CommentService: ICommentService
     {
         private readonly CatalogContext _context;
         private readonly IMapper _mapper;
         private readonly IFilmService _filmService;
         
-        public CommentsService(CatalogContext context, IMapper mapper, IFilmService filmService)
+        public CommentService(CatalogContext context, IMapper mapper, IFilmService filmService)
         {
             _context = context;
             _mapper = mapper;
@@ -44,9 +42,10 @@ namespace CatalogApi.Services
 
         public void Delete(int id)
         {
-            if (_context.Comments.Find(id) == null)
+            Comment com;
+            if ((com = GetById(id)) == null)
                 throw new AppException($"Invalid id = {id}");
-            _context.Comments.Remove(GetById(id));
+            _context.Comments.Remove(com);
             _context.SaveChanges();
         }
 
@@ -60,11 +59,6 @@ namespace CatalogApi.Services
             com.Content = request.Content;
             _context.Comments.Update(com);
             _context.SaveChanges();
-        }
-
-        public IEnumerable<Comment> GetCommentsByFilmId(int id)
-        {
-            return _context.Comments.Where(x => x.Id == id).Include(y => y.User.FirstName);
         }
 
         private Comment GetById(int id)

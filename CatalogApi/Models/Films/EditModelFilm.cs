@@ -11,7 +11,7 @@ namespace CatalogApi.Models.Films
         public string Description { get; set; }
         public DateTime DateCreateFilm { get; set; }
         
-        [EnumDataType(typeof(Сategory))]
+        [EnumDataType(typeof(Category))]
         public string Category
         {
             get => _category;

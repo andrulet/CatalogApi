@@ -1,12 +1,13 @@
 using System;
 using FileStorage;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Reflection;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models;
+using CatalogApi.Models.Collections;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace CatalogApi.Services
 {
@@ -35,6 +37,10 @@ namespace CatalogApi.Services
         void UploadImage(IFormFile file, int idFilm);
         
         IActionResult DownloadImage(int idFilm);
+
+        double GetRatingByFilmId(int id);
+        IEnumerable<FilmInfoResponse> SearchByKey(string keyQuery, string valueQuery);
+        IEnumerable<FilmInfoResponse> SearchByFilter(Dictionary<string, StringValues> query);
     }
     
     public class FilmService : IFilmService
@@ -45,7 +51,12 @@ namespace CatalogApi.Services
         private readonly IFileStorageService _fileStorageService;
         private readonly string _path;
         
-        public FilmService(CatalogContext context, IConfiguration configuration, IMapper mapper, IRatingService ratingService, IFileStorageService fileStorageService)
+        public FilmService(
+            CatalogContext context,
+            IConfiguration configuration,
+            IMapper mapper,
+            IRatingService ratingService,
+            IFileStorageService fileStorageService)
         {
             _context = context;
             _mapper = mapper;
@@ -60,6 +71,8 @@ namespace CatalogApi.Services
             if (_context.Films.Any(x => x.Title == model.Title))
                 throw new AppException("Film'" + film.Title + "' is already taken");
             _context.Films.Add(film);
+            _context.SaveChanges();
+            SetRating(new SetRatingOnFilm(){FilmId = film.Id});
             _context.SaveChanges();
         }
         public FilmInfoResponse GetInfoFilmById(int id)
@@ -92,8 +105,8 @@ namespace CatalogApi.Services
         {
             if (GetById(id) == null)
                 throw new AppException("Incorrect Id = " + id);
-            var comments = _context.Comments.Include(c =>c.User).ToList();
-            var y = this.GetById(id).Comments;
+            _context.Comments.Include(c =>c.User).Load();
+            var y = GetById(id).Comments;
             return y.Select(x => new CommentFilmResponse(x));
         }
 
@@ -129,9 +142,104 @@ namespace CatalogApi.Services
             return new FileStreamResult(stream, "image/" + film.Path.Split(".").Last());
         }
 
-        private double GetRatingByFilmId(int id)
+        public double GetRatingByFilmId(int id)
         {
-            return _ratingService.GetRatingByFilmTitle(id);
+            return _ratingService.GetRatingByFilm(id);
+        }
+
+        public IEnumerable<FilmInfoResponse> SearchByKey(string keyQuery, string valueQuery)
+        {
+            var films = GetAll();
+            var keyAndValueSearch = GetNamePropertyAndValue(keyQuery, valueQuery);
+            if (keyAndValueSearch == (null,null)) 
+                throw new AppException("Incorrect key for searching.");
+            return GetFilmsBySearchKeyAndValue(keyAndValueSearch, films);
+        }
+
+        public IEnumerable<FilmInfoResponse> SearchByFilter(Dictionary<string, StringValues> query)
+        {
+            var films = GetAll();
+            var parameters = SetParams(query);
+            var selectFilms = films.Where(f =>
+                f.Score <= parameters.MaxScore && f.Score >= parameters.MinScore &&
+                f.YearCreateFilm.Year <= parameters.MaxYear && f.YearCreateFilm.Year >= parameters.MinYear
+            );
+
+            var result = new List<FilmInfoResponse>();
+            foreach (var x in parameters.Categories)
+            {
+                result.AddRange(selectFilms.Where(y => y.Category == Enum.GetName(x)));
+            }
+
+            return result;
+        }
+
+        private ParametersForSearching SetParams(Dictionary<string, StringValues> query)
+        {
+            var parameters = new ParametersForSearching();
+            foreach (var pair in query)
+            {
+                GetParamByKey(pair, ref parameters);
+            }
+
+            return parameters;
+        }
+
+        private IEnumerable<FilmInfoResponse> GetAll()
+        {
+            var films = _context.Films.ToList();
+            return films.Select(x => GetInfoFilmById(x.Id));
+        }
+
+        private (PropertyInfo,dynamic) GetNamePropertyAndValue(string keyQuery, string valueQuery)
+        {
+            Type type = typeof(FilmInfoResponse);
+            switch (keyQuery)
+            {
+                case "title":
+                    return (type.GetProperty("Title"), valueQuery);
+                case "category":
+                    return (type.GetProperty("Category"), valueQuery);
+                case "score":
+                    return (type.GetProperty("Score"),Convert.ToDouble(valueQuery));
+                default:
+                    return (null, null);
+            }
+        }
+
+        private IEnumerable<FilmInfoResponse> GetFilmsBySearchKeyAndValue((PropertyInfo, dynamic) keyAndValueSearch,
+            IEnumerable<FilmInfoResponse> films)
+        {
+            if (keyAndValueSearch.Item1.Name == "Title")
+                return films.Where(f => f.Title.ToLowerInvariant().Contains(((string)keyAndValueSearch.Item2).ToLowerInvariant()));
+            if (keyAndValueSearch.Item1.Name == "Category")
+                return films.Where(f => f.Category == keyAndValueSearch.Item2);
+            if (keyAndValueSearch.Item1.Name == "Score")
+                return films.Where(f => f.Score == keyAndValueSearch.Item2);
+            return null;
+        }
+
+        private void GetParamByKey(KeyValuePair<string, StringValues> pair, ref ParametersForSearching parametres)
+        {
+            switch (pair.Key.ToLowerInvariant())
+            {
+                case "minyear":
+                    parametres.MinYear = Convert.ToInt32(pair.Value);
+                    break;
+                case "maxyear":
+                    parametres.MaxYear = Convert.ToInt32(pair.Value);
+                    break;
+                case "minscore":
+                    parametres.MinScore = Convert.ToDouble(pair.Value);
+                    break;
+                case "maxscore":
+                    parametres.MaxScore = Convert.ToDouble(pair.Value);
+                    break;
+                case "categories":
+                    parametres.Categories = pair.Value.ToString().Split(",").Select(x =>Enum.Parse<Category>(x));
+                    break;
+                
+            }
         }
     }
 }

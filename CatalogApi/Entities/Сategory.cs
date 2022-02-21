@@ -1,6 +1,8 @@
-﻿namespace CatalogApi.Entities
+﻿using System;
+
+namespace CatalogApi.Entities
 {
-    public enum Сategory
+    public enum Category
     {
         Action,
         Comedy,

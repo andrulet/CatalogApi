@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CatalogApi.Entities;
+using CatalogApi.Models.Collections;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Users;
 using CatalogApi.Models.Films;
@@ -19,6 +20,8 @@ namespace CatalogApi.Helpers
             CreateMap<Comment, CommentResponse>();
             CreateMap<EditCommentRequest, Comment>();
             CreateMap<SetRatingOnFilm, Rating>();
+            CreateMap<CollectionCreateRequest, Collection>();
+            CreateMap<Collection, CollectionInfoResponse>();
         }
     }
 }

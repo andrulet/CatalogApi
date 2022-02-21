@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using CatalogApi.Entities;
 using CatalogApi.Models;
 using FileStorage;
 
@@ -34,9 +35,10 @@ namespace CatalogApi
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IFilmService, FilmService>();
-            services.AddScoped<ICommentsService, CommentsService>();
+            services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IRatingService, RatingService>();
-            services.AddScoped<IFileStorageService,FileStorageService>();
+            services.AddScoped<IFileStorageService, FileStorageService>();
+            services.AddScoped<ICollectionService, CollectionService>();
         }
 
         // configure the HTTP request pipeline

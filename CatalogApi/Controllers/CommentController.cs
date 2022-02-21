@@ -9,9 +9,9 @@ namespace CatalogApi.Controllers
     [Route("[controller]")]
     public class CommentsController : ControllerBase
     {
-        private ICommentsService _commentsService;
+        private ICommentService _commentsService;
         
-        public CommentsController(ICommentsService commentsService)
+        public CommentsController(ICommentService commentsService)
         {
             _commentsService = commentsService;
         }

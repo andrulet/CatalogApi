@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models.Comments;
@@ -106,12 +107,12 @@ namespace CatalogApi.Controllers
         }
 
         [HttpGet("{filmId:int}info")]
-        public IActionResult GetInfoAboutFilm(int filmId)
+        public object GetInfoAboutFilm(int filmId)
         {
             try
             {
                 // get info about film
-                return Ok(_filmService.GetInfoFilmById(filmId));
+                return _filmService.GetInfoFilmById(filmId);
             }
             catch (AppException ex)
             {
