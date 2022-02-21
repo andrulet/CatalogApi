@@ -23,11 +23,11 @@ namespace CatalogApi.Entities
         [JsonIgnore]
         public bool IsAdmin { get; set; }
         
-        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
         
-        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         
-        public ICollection<Collection> Collections { get; set; } = new List<Collection>();
+        public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
 
     }
 }

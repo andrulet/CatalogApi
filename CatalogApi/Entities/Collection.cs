@@ -12,8 +12,8 @@ namespace CatalogApi.Entities
         
         public int? UserId { get; set; }
         
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
-        public ICollection<Film> Films { get; set; } = new List<Film>();
+        public virtual ICollection<Film> Films { get; set; } = new List<Film>();
     }
 }

@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using CatalogApi.Models;
+using CatalogApi.Repositories;
 
 namespace CatalogApi.Services
 {
@@ -30,13 +31,13 @@ namespace CatalogApi.Services
     {
         private readonly IConfiguration _configuration;
 
-        private readonly CatalogContext _context;
+        private readonly IRepository<User> _userRepository;
 
         private readonly IMapper _mapper;
 
-        public UserService(CatalogContext context, IConfiguration configuration, IMapper mapper)
+        public UserService(IRepository<User> userRepository, IConfiguration configuration, IMapper mapper)
         {
-            _context = context;
+            _userRepository = userRepository;
             _configuration = configuration;
             _mapper = mapper;
         }
@@ -46,7 +47,7 @@ namespace CatalogApi.Services
             if (string.IsNullOrEmpty(authenticateRequest.Email) || string.IsNullOrEmpty(authenticateRequest.Password))
                 return null;
 
-            var user = _context.Users.SingleOrDefault(x => x.Email == authenticateRequest.Email);
+            var user = _userRepository.GetAll().SingleOrDefault(x => x.Email == authenticateRequest.Email);
             
             if (user == null)
                 return null;
@@ -63,7 +64,7 @@ namespace CatalogApi.Services
             if (string.IsNullOrWhiteSpace(request.Password))
                 throw new AppException("Password is required");
 
-            if (_context.Users.Any(x => x.Email == request.Email))
+            if (_userRepository.GetAll().Any(x => x.Email == request.Email))
                 throw new AppException("Username '" + request.Email + "' is already taken");
 
             CreatePasswordHash(request.Password, out var passwordHash, out var passwordSalt);
@@ -73,20 +74,20 @@ namespace CatalogApi.Services
             
             var token = GenerateJwtToken(user);
             
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            _userRepository.Insert(user);
+            _userRepository.Save();
 
             return new AuthenticateResponse(user, token);
         }
 
         public User GetById(int id)
         {
-            return _context.Users.Find(id);
+            return _userRepository.GetById(id);
         }
         
         public IEnumerable<User> GetAll()
         {
-            return _context.Users;
+            return _userRepository.GetAll();
         }
 
         // helper methods        

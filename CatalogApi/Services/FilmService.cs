@@ -11,6 +11,7 @@ using CatalogApi.Models.Collections;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
+using CatalogApi.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,20 +46,20 @@ namespace CatalogApi.Services
     
     public class FilmService : IFilmService
     {
-        private readonly CatalogContext _context;
+        private readonly IRepository<Film> _filmRepository;
         private readonly IMapper _mapper;
         private readonly IRatingService _ratingService;
         private readonly IFileStorageService _fileStorageService;
         private readonly string _path;
         
         public FilmService(
-            CatalogContext context,
+            IRepository<Film> filmRepository,
             IConfiguration configuration,
             IMapper mapper,
             IRatingService ratingService,
             IFileStorageService fileStorageService)
         {
-            _context = context;
+            _filmRepository = filmRepository;
             _mapper = mapper;
             _ratingService = ratingService;
             _fileStorageService = fileStorageService;
@@ -68,12 +69,12 @@ namespace CatalogApi.Services
         public void Create(CreateModelFilm model)
         {
             var film = _mapper.Map<Film>(model);
-            if (_context.Films.Any(x => x.Title == model.Title))
+            if (_filmRepository.GetAll().Any(x => x.Title == model.Title))
                 throw new AppException("Film'" + film.Title + "' is already taken");
-            _context.Films.Add(film);
-            _context.SaveChanges();
+            _filmRepository.Insert(film);
+            _filmRepository.Save();
             SetRating(new SetRatingOnFilm(){FilmId = film.Id});
-            _context.SaveChanges();
+            _filmRepository.Save();
         }
         public FilmInfoResponse GetInfoFilmById(int id)
         {
@@ -82,31 +83,30 @@ namespace CatalogApi.Services
         
         public void Delete(int id)
         {
-            _context.Films.Remove(GetById(id));
-            _context.SaveChanges();
+            _filmRepository.Delete(id);
+            _filmRepository.Save();
         }
 
         public Film Edit(int id, EditModelFilm model)
         {
             var film = _mapper.Map<Film>(model);
             film.Id = id;
-            if (_context.Films.Any(x => x.Title == film.Title && x.Id != film.Id))
+            if (_filmRepository.GetAll().Any(x => x.Title == film.Title && x.Id != film.Id))
                 throw new AppException("Film'" + film.Title + "' is already taken");
             
-            var f =GetById(film.Id);
-            _context.Films.Remove(f);
-            f = film;
-            _context.Films.Update(f);
-            _context.SaveChanges();
-            return f;
+            _filmRepository.Update(film);
+            _filmRepository.Save();
+            return film;
         }
 
         public IEnumerable<CommentFilmResponse> GetComments(int id)
         {
-            if (GetById(id) == null)
+            Film film;
+            if ((film = GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
-            _context.Comments.Include(c =>c.User).Load();
-            var y = GetById(id).Comments;
+            _filmRepository.GetAll();
+            //_context.Comments.Include(c =>c.User).Load();
+            var y = _filmRepository.GetAll().FirstOrDefault(x => x.Id == film.Id)?.Comments;
             return y.Select(x => new CommentFilmResponse(x));
         }
 
@@ -118,7 +118,7 @@ namespace CatalogApi.Services
         public Film GetById(int id)
         {
             Film film;
-            if ((film = _context.Films.Find(id)) == null)
+            if ((film = _filmRepository.GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
             return film;
         }
@@ -129,7 +129,7 @@ namespace CatalogApi.Services
             var pathFile = string.IsNullOrEmpty(film.Path) ? _path + DateTime.Now.Ticks + "." + file.ContentType.Split('/').Last() : film.Path;
             _fileStorageService.Upload(file, pathFile);
             film.Path = pathFile;
-            _context.SaveChanges();
+            _filmRepository.Save();
         }
 
         public IActionResult DownloadImage(int idFilm)
@@ -163,7 +163,7 @@ namespace CatalogApi.Services
             var selectFilms = films.Where(f =>
                 f.Score <= parameters.MaxScore && f.Score >= parameters.MinScore &&
                 f.YearCreateFilm.Year <= parameters.MaxYear && f.YearCreateFilm.Year >= parameters.MinYear
-            );
+            ).ToList();
 
             var result = new List<FilmInfoResponse>();
             foreach (var x in parameters.Categories)
@@ -187,7 +187,7 @@ namespace CatalogApi.Services
 
         private IEnumerable<FilmInfoResponse> GetAll()
         {
-            var films = _context.Films.ToList();
+            var films = _filmRepository.GetAll();
             return films.Select(x => GetInfoFilmById(x.Id));
         }
 

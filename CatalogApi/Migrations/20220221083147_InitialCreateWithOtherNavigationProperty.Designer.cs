@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CatalogApi.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20220220230952_InitialCreateWithOtherTypesInDB")]
-    partial class InitialCreateWithOtherTypesInDB
+    [Migration("20220221083147_InitialCreateWithOtherNavigationProperty")]
+    partial class InitialCreateWithOtherNavigationProperty
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -89,8 +89,8 @@ namespace CatalogApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DateCreateFilm")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("DateCreateFilm")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");

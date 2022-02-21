@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using CatalogApi.Entities;
 using CatalogApi.Models;
+using CatalogApi.Repositories;
 using FileStorage;
 
 namespace CatalogApi
@@ -39,6 +39,7 @@ namespace CatalogApi
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<ICollectionService, CollectionService>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         }
 
         // configure the HTTP request pipeline

@@ -15,10 +15,10 @@ namespace CatalogApi.Entities
         [JsonIgnore]
         public string Path { get; set; }
         [JsonIgnore]
-        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
         [JsonIgnore]
-        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
+        public virtual ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         [JsonIgnore]
-        public ICollection<Collection> Collections { get; set; } = new List<Collection>();
+        public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
     }
 }

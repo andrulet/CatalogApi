@@ -87,8 +87,8 @@ namespace CatalogApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DateCreateFilm")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("DateCreateFilm")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");

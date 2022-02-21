@@ -9,7 +9,6 @@ namespace CatalogApi.Models
         {
             Database.EnsureCreated();
         }
-        
         public DbSet<User> Users { get; set; }
         public DbSet<Film> Films { get; set; }
         public DbSet<Comment> Comments { get; set; }
