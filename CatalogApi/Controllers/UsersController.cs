@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using CatalogApi.Services;
 using CatalogApi.Helpers;
 using AutoMapper;
 using CatalogApi.Models.Users;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Controllers
 {

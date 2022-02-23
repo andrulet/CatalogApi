@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using CatalogApi.Helpers;
-using CatalogApi.Services;
+using CatalogApi.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogApi.Controllers

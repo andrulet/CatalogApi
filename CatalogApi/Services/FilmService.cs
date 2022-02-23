@@ -6,45 +6,21 @@ using System.Reflection;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
-using CatalogApi.Models;
-using CatalogApi.Models.Collections;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
-using CatalogApi.Repositories;
+using CatalogApi.Repositories.FilmRepository;
+using CatalogApi.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
 namespace CatalogApi.Services
 {
-    public interface IFilmService
-    {
-        void Create(CreateModelFilm film);
-
-        FilmInfoResponse GetInfoFilmById(int id);
-
-        Film GetById(int id);
-        
-        void Delete(int id);
-
-        Film Edit(int id, EditModelFilm film);
-        IEnumerable<CommentFilmResponse> GetComments(int id);
-        
-        void SetRating(SetRatingOnFilm request);
-
-        void UploadImage(IFormFile file, int idFilm);
-        
-        IActionResult DownloadImage(int idFilm);
-        IEnumerable<FilmInfoResponse> SearchByKey(string keyQuery, string valueQuery);
-        IEnumerable<FilmInfoResponse> SearchByFilter(Dictionary<string, StringValues> query);
-    }
-    
     public class FilmService : IFilmService
     {
-        private readonly IRepository<Film> _filmRepository;
+        private readonly IFilmRepository _filmRepository;
         private readonly IMapper _mapper;
         private readonly IRatingService _ratingService;
         private readonly IFileStorageService _fileStorageService;
@@ -52,7 +28,7 @@ namespace CatalogApi.Services
         private readonly string _path;
         
         public FilmService(
-            IRepository<Film> filmRepository,
+            IFilmRepository filmRepository,
             IConfiguration configuration,
             IMapper mapper,
             IRatingService ratingService,
@@ -90,6 +66,7 @@ namespace CatalogApi.Services
         {
             var film = _mapper.Map<Film>(model);
             film.Id = id;
+            film.Path = _filmRepository.GetById(id).Path;
             if (_filmRepository.GetAll().Any(x => x.Title == film.Title && x.Id != film.Id))
                 throw new AppException("Film'" + film.Title + "' is already taken");
             
@@ -104,7 +81,6 @@ namespace CatalogApi.Services
             if ((film = GetById(id)) == null)
                 throw new AppException("Incorrect Id = " + id);
             _filmRepository.GetAll();
-            //_filmRepository(c =>c.User).Load();
             _filmRepository.LoadAllComments();
             var y = GetById(id).Comments;
             return y.Select(x => new CommentFilmResponse(x));
@@ -241,7 +217,7 @@ namespace CatalogApi.Services
                     parametres.MaxScore = Convert.ToDouble(pair.Value);
                     break;
                 case "categories":
-                    parametres.Categories = pair.Value.ToString().Split(",").Select(x =>Enum.Parse<Category>(x));
+                    parametres.Categories = pair.Value.ToString().Split(",").Select(Enum.Parse<Category>);
                     break;
                 
             }

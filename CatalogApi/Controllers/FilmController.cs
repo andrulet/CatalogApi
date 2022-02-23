@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
 using CatalogApi.Models.Comments;
 using CatalogApi.Models.Films;
 using CatalogApi.Models.Rating;
-using CatalogApi.Services;
+using CatalogApi.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogApi.Controllers

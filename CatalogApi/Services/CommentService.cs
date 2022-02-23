@@ -2,25 +2,19 @@
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
-using CatalogApi.Models.Comments;
-using CatalogApi.Repositories;
+using CatalogApi.Models.Comments; 
+using CatalogApi.Repositories.CommentRepository;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Services
 {
-    public interface ICommentService
-    {
-        CommentResponse Create(CreateCommentRequest request);
-        void Delete(int id);
-        void Edit(int id, EditCommentRequest request);
-    }
-    
     public class CommentService: ICommentService
     {
-        private readonly IRepository<Comment> _commentRepository;
+        private readonly ICommentRepository _commentRepository;
         private readonly IMapper _mapper;
         private readonly IFilmService _filmService;
         
-        public CommentService(IRepository<Comment> commentRepository, IMapper mapper, IFilmService filmService)
+        public CommentService(ICommentRepository commentRepository, IMapper mapper, IFilmService filmService)
         {
             _commentRepository = commentRepository;
             _mapper = mapper;
@@ -39,8 +33,7 @@ namespace CatalogApi.Services
 
         public void Delete(int id)
         {
-            Comment com;
-            if ((com = GetById(id)) == null)
+            if (GetById(id) == null)
                 throw new AppException($"Invalid id = {id}");
             _commentRepository.Delete(id);
             _commentRepository.Save();

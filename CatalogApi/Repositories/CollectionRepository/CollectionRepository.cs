@@ -1,44 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CatalogApi.Entities;
 using CatalogApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CatalogApi.Repositories;
+namespace CatalogApi.Repositories.CollectionRepository;
 
-public class Repository<T> : IRepository<T> where T : class
+public class CollectionRepository : ICollectionRepository
 {
     private readonly CatalogContext _context;
-    private readonly DbSet<T> _table;
+    private readonly DbSet<Collection> _table;
 
-    public Repository(CatalogContext catalogContext)
+    public CollectionRepository(CatalogContext catalogContext)
     {
         _context = catalogContext;
-        _table = _context.Set<T>();
+        _table = _context.Set<Collection>();
     }
-    public IEnumerable<T> GetAll()
+    public IEnumerable<Collection> GetAll()
     {
         return _table.ToList();
     }
 
-    public T GetById(object id)
+    public Collection GetById(int id)
     {
         return _table.Find(id);
     }
 
-    public void Insert(T obj)
+    public void Insert(Collection obj)
     {
         _table.Add(obj);
     }
 
-    public void Update(T obj)
+    public void Update(Collection obj)
     {
-        //_table.Attach(obj);
         _context.Entry(obj).State = EntityState.Modified;
     }
 
-    public void Delete(object id)
+    public void Delete(int id)
     {
-        T existing = _table.Find(id);
+        Collection existing = _table.Find(id);
         if (existing != null) _table.Remove(existing);
     }
 
@@ -46,15 +46,12 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _context.SaveChanges();
     }
-
-    public void LoadAllComments()
-    {
-        _context.Comments.Include(u => u.User).Load();
-    }
+    
     public void LoadAllUserInfoForCollections()
     {
         _context.Collections.Include(u=>u.User).Load();
     }
+	
     public void LoadAllFilmInfoInCollections()
     {
         _context.Collections.Include(f => f.Films).Load();

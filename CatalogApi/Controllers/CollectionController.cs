@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using CatalogApi.Entities;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using CatalogApi.Services;
 using CatalogApi.Helpers;
 using CatalogApi.Models.Collections;
-using CatalogApi.Models.Comments;
-using CatalogApi.Models.Films;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Controllers
 {
@@ -78,7 +75,8 @@ namespace CatalogApi.Controllers
             try
             {
                 // get info collection
-                return Ok(_collectionService.GetCollectionInfo(collectionId));
+                var result = _collectionService.GetCollectionInfo(collectionId);
+                return Ok(!result.Any() ? new { messsge = "This collection is empty"} : result);
             }
             catch (AppException ex)
             {

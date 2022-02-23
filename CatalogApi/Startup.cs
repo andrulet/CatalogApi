@@ -8,6 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using CatalogApi.Models;
 using CatalogApi.Repositories;
+using CatalogApi.Repositories.CollectionRepository;
+using CatalogApi.Repositories.CommentRepository;
+using CatalogApi.Repositories.FilmRepository;
+using CatalogApi.Repositories.RatingRepository;
+using CatalogApi.Repositories.UserRepository;
+using CatalogApi.Services.IServices;
 using FileStorage;
 
 namespace CatalogApi
@@ -39,7 +45,12 @@ namespace CatalogApi
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<ICollectionService, CollectionService>();
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<ICollectionRepository, CollectionRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IFilmRepository, FilmRepository>();
+            services.AddScoped<IRatingRepository, RatingRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
         }
 
         // configure the HTTP request pipeline

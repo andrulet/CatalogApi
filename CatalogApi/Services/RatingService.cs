@@ -7,23 +7,20 @@ using CatalogApi.Helpers;
 using CatalogApi.Models;
 using CatalogApi.Models.Rating;
 using CatalogApi.Repositories;
+using CatalogApi.Repositories.RatingRepository;
+using CatalogApi.Services.IServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace CatalogApi.Services
 {
-    public interface IRatingService
-    {
-        void SetRating(SetRatingOnFilm request);
-        double GetRatingByFilm(int filmid);
-    }
     public class RatingService : IRatingService
     {
-        private readonly IRepository<Rating> _ratingRepository;
+        private readonly IRatingRepository _ratingRepository;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        public RatingService(IRepository<Rating> ratingRepository, IMapper mapper, IConfiguration configuration)
+        public RatingService(IRatingRepository ratingRepository, IMapper mapper, IConfiguration configuration)
         {
             _ratingRepository = ratingRepository;
             _mapper = mapper;
@@ -40,7 +37,7 @@ namespace CatalogApi.Services
             _ratingRepository.Save();
         }
 
-        public double GetRatingByFilm(int filmid)
+        public double GetRatingByFilm(int filmId)
         {
             double rating;
             var sqlExpression = "Get_Score"; 
@@ -53,7 +50,7 @@ namespace CatalogApi.Services
                 var id = new SqlParameter
                 {
                     ParameterName = "@filmid",
-                    Value = filmid
+                    Value = filmId
                 };
                     
                 command.Parameters.Add(id);

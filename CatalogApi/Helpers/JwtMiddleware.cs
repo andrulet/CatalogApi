@@ -1,5 +1,4 @@
-﻿using CatalogApi.Services;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -7,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Helpers
 {
@@ -35,7 +35,10 @@ namespace CatalogApi.Helpers
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
+                var tokenHandler = new JwtSecurityTokenHandler
+                {
+                    TokenLifetimeInMinutes = (int)TimeSpan.FromMinutes(15).TotalMinutes
+                };
                 var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -43,7 +46,7 @@ namespace CatalogApi.Helpers
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ClockSkew = TimeSpan.FromMinutes(10)
+                    ClockSkew = TimeSpan.FromMinutes(0)
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;

@@ -3,33 +3,24 @@ using System.Linq;
 using AutoMapper;
 using CatalogApi.Entities;
 using CatalogApi.Helpers;
-using CatalogApi.Models;
 using CatalogApi.Models.Collections;
 using CatalogApi.Models.Films;
-using CatalogApi.Repositories;
-using Microsoft.EntityFrameworkCore;
+using CatalogApi.Repositories.CollectionRepository;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Services;
 
-public interface ICollectionService
-{
-    void Create(CollectionCreateRequest request);
-    void Delete(int collectionId);
-    IEnumerable<CollectionInfoResponse> GetAll(int userId);
-    void AddFilmIntoCollection(FilmAddIntoCollectionRequest response);
-    CollectionInfoResponse EditCollection(int collectionId,CollectionEditRequest request);
-    IEnumerable<FilmInfoResponse> GetCollectionInfo(int collectionId);
-}
+
 
 public class CollectionService : ICollectionService
 {
-    private readonly IRepository<Collection> _collectionRepository;
+    private readonly ICollectionRepository _collectionRepository;
     private readonly IMapper _mapper;
     private readonly IRatingService _ratingService;
     private readonly IFilmService _filmService;
     private readonly IUserService _userService;
     
-    public CollectionService(IRepository<Collection> collectionRepository, IMapper mapper, IRatingService ratingService, IFilmService filmService, IUserService userService)
+    public CollectionService(ICollectionRepository collectionRepository, IMapper mapper, IRatingService ratingService, IFilmService filmService, IUserService userService)
     {
         _collectionRepository = collectionRepository;
         _mapper = mapper;

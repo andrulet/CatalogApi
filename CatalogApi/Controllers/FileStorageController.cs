@@ -1,5 +1,5 @@
 ﻿using CatalogApi.Helpers;
-using CatalogApi.Services;
+using CatalogApi.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

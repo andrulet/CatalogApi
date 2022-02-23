@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using CatalogApi.Services;
 using CatalogApi.Helpers;
 using CatalogApi.Models.Users;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Controllers
 {

@@ -10,32 +10,20 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
-using CatalogApi.Models;
-using CatalogApi.Repositories;
+using CatalogApi.Repositories.UserRepository;
+using CatalogApi.Services.IServices;
 
 namespace CatalogApi.Services
 {
-    public interface IUserService
-    {
-        AuthenticateResponse Authenticate(AuthenticateRequest authenticateRequest);
-
-        AuthenticateResponse Register(RegisterRequest registerModelUser);
-
-        User GetById(int id);
-
-        IEnumerable<User> GetAll();
-
-    }
-
     public class UserService : IUserService
     {
         private readonly IConfiguration _configuration;
 
-        private readonly IRepository<User> _userRepository;
+        private readonly IUserRepository _userRepository;
 
         private readonly IMapper _mapper;
 
-        public UserService(IRepository<User> userRepository, IConfiguration configuration, IMapper mapper)
+        public UserService(IUserRepository userRepository, IConfiguration configuration, IMapper mapper)
         {
             _userRepository = userRepository;
             _configuration = configuration;
